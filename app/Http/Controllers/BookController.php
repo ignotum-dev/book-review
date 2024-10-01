@@ -33,7 +33,7 @@ class BookController extends Controller
         };
         $books = $books->get();
         
-        return view('books.index', ['books' => $books]);
+        return response(view('books.index', ['books' => $books]));
     }
 
     /**
@@ -63,9 +63,17 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Book $book)
     {
-        //
+        
+        return response(view(
+            'books.show', 
+            [
+                'book' => $book->load([
+                    'reviews' => fn ($query) => $query->latest()             
+                ])
+            ]
+        ));
     }
 
     /**
