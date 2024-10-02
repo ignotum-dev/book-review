@@ -73,20 +73,15 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(Book $book)
     {
-        $cacheKey = 'books:' . $id;
+        $cacheKey = 'book:' . $book->id;
+        $book = cache()->remember($cacheKey, 3600, fn() => $book->load([
+            'reviews' => fn($query) => $query->latest()
+        ]));
+        return view('books.show', ['book' => $book]);
 
-        $book = cache()->remember(
-            $cacheKey,
-            3600,
-            fn() =>
-            Book::with([
-                'reviews' => fn($query) => $query->latest()
-            ])->withAvgRating()->withReviewsCount()->findOrFail($id)
-        );
-
-        return response(view('books.show', ['book' => $book]));
+        // return response(view('books.show', ['book' => $book]));
     }
 
     /**
